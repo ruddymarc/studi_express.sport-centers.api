@@ -13,6 +13,7 @@ const models = require('./models')
 
 // Import routers
 const usersRouter = require('./routes/users')
+const coachsRouter = require('./routes/coachs')
 
 const app = express()
 app.set('models', models)
@@ -25,5 +26,6 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use(welcome, login, guard)
 
 app.use('/users', usersRouter)
+app.use('/coachs', coachsRouter)
 
 module.exports = app
