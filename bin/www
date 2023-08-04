@@ -6,6 +6,19 @@
 const app = require('../app')
 const debug = require('debug')('sport-centers.api:server')
 const http = require('http')
+const mongoose = require('mongoose')
+
+/**
+ * Connect to database
+ */
+mongoose
+  .connect('mongodb://127.0.0.1:27017/sportCenters', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000 // set timeout 5s
+  })
+  .then(() => { console.log('DB connected !') })
+  .catch((error) => { console.error(error) })
 
 /**
  * Get port from environment and store in Express.
