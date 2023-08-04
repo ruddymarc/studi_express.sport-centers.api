@@ -3,10 +3,15 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 
+// Import models
+const models = require('./models')
+
+// Import routers
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
 
 const app = express()
+app.set('models', models)
 
 app.use(logger('dev'))
 app.use(express.json())
