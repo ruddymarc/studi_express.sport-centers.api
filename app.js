@@ -5,7 +5,7 @@ const logger = require('morgan')
 
 // Import middlewares
 const {
-  welcome
+  welcome, login
 } = require('./middlewares')
 
 // Import models
@@ -22,7 +22,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(welcome)
+app.use(welcome, login)
 
 app.use('/users', usersRouter)
 
