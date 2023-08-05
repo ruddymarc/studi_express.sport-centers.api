@@ -2,7 +2,8 @@ const express = require('express')
 const router = express.Router()
 const {
   createCustomer, readCustomer, updateCustomer, deleteCustomer,
-  addSubscribtion, removeSubscribtion
+  addSubscribtion, removeSubscribtion,
+  bookedSlot, unbookedSlot
 } = require('../controllers/customers')
 
 /* GET customers listing. */
@@ -22,5 +23,11 @@ router.put('/subscribtion/add', addSubscribtion)
 
 /* PUT remove one subscribtion. */
 router.put('/subscribtion/remove', removeSubscribtion)
+
+/* PUT remove one subscribtion. */
+router.put('/slot/booked', bookedSlot)
+
+/* PUT remove one subscribtion. */
+router.put('/slot/unbooked', unbookedSlot)
 
 module.exports = router

@@ -136,7 +136,76 @@ const removeSubscribtion = async (req, res, next) => {
     .catch((error) => { next(error) })
 }
 
+/**
+ * Booked slot
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+const bookedSlot = async (req, res, next) => {
+  // check required properties
+  if (!req.body?.customerId || !req.body?.slotId) {
+    return next('customerId and slotId is required !')
+  }
+  const { Customer, Slot } = req.app.get('models')
+  const { customerId, slotId } = req.body
+
+  // check already booked this slot
+  Slot
+    .findOne({ _id: slotId, customers: { $nin: [customerId]}})
+    .then((slot) => {
+      if (!slot) {
+        next("You have already booked this slot!")
+      }
+
+      const { date, peopleLimit, customers } = slot
+      // check people limit
+      if (peopleLimit <= customers.length) {
+        next("Slots booked have reached their limits!")
+      }
+      // search customer
+      Customer
+        .findById(customerId, { subscribtions: true, slots: true })
+        .populate('subscribtions')
+        .then((customer) => {
+          // check valid subscribtion
+          if (customer.subscribtions.map(subscribtion => subscribtion.endAt < date) === false) {
+            next("Must be subscriber !")
+          }
+          // save booked
+          slot.customers.push(customer)
+          customer.slots.push(slot)
+          slot.save()
+          customer.save()
+
+          res.json("booked slot successfully.")
+        })
+        .catch((error) => next(error))
+    })
+    .catch((error) => { next(error) })
+}
+
+/**
+ * Unbooked slot
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+const unbookedSlot = async (req, res, next) => {
+  // check required properties
+  if (!req.body?.customerId || !req.body?.slotId) {
+    return next('customerId and slotId is required !')
+  }
+  const { Customer } = req.app.get('models')
+  const { customerId, slotId } = req.body
+  Customer
+    .findByIdAndUpdate(customerId, { $pull: { slots: slotId }})
+    .then((customer) => { res.json(customer) })
+    .catch((error) => { next(error) })
+}
+
 module.exports = {
   createCustomer, readCustomer, updateCustomer, deleteCustomer,
-  addSubscribtion, removeSubscribtion
+  addSubscribtion, removeSubscribtion,
+  bookedSlot, unbookedSlot
 }
