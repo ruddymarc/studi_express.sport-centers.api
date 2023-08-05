@@ -5,7 +5,7 @@ const { ObjectId } = Schema.Types
 const customerSchema = Schema({
   user: { type: ObjectId, ref: 'User' },
   level: { type: String, default: 'beginner' },
-  subscribtions: [],
+  subscribtions: [{ type: ObjectId, ref: 'Subscribtion' }],
   slots: []
 })
 

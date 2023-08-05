@@ -75,6 +75,68 @@ const deleteCustomer = async (req, res, next) => {
     .catch((error) => { next(error) })
 }
 
+/**
+ * Add one subscribtion
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+const addSubscribtion = async (req, res, next) => {
+  // check required properties
+  if (!req.body?.customerId || !req.body?.amountPaid) {
+    return next('customerId and amountPaid is required !')
+  }
+  const { Customer, Subscribtion } = req.app.get('models')
+  const { customerId, amountPaid } = req.body
+  // find one customer
+  Customer
+    .findById(customerId, { subscribtions: true })
+    .populate('subscribtions')
+    .then((customer) => {
+      // ensure subscribtion has concecutive
+      const startAt = new Date(Math.max(
+        Date.now(),
+        ...customer.subscribtions.map(subscribtion => subscribtion.endAt.valueOf())
+      ))
+      const endAt = new Date(startAt)
+      endAt.setMonth(startAt.getMonth() +1)
+      // Save new subscribtion
+      new Subscribtion({
+        startAt: startAt.toISOString().replace(/T/, ' ').replace(/\..+/, '')+".100",
+        endAt: endAt.toISOString().replace(/T/, ' ').replace(/\..+/, '')+".100",
+        amountPaid
+      })
+        .save()
+        .then((subscribtion) => {
+          customer.subscribtions.push(subscribtion)
+          customer.save()
+          res.json(subscribtion)
+        })
+        .catch((error) => { next(error) })
+    })
+    .catch((error) => { next(error) })
+}
+
+/**
+ * Remove one subscribtion
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+const removeSubscribtion = async (req, res, next) => {
+  // check required properties
+  if (!req.body?.customerId || !req.body?.amountPaid) {
+    return next('customerId and amountPaid is required !')
+  }
+  const { Customer } = req.app.get('models')
+  const { customerId, subscribtionId } = req.body
+  Customer
+    .findByIdAndUpdate(customerId, { $pull: { subscribtions: subscribtionId }})
+    .then((customer) => { res.json(customer) })
+    .catch((error) => { next(error) })
+}
+
 module.exports = {
-  createCustomer, readCustomer, updateCustomer, deleteCustomer
+  createCustomer, readCustomer, updateCustomer, deleteCustomer,
+  addSubscribtion, removeSubscribtion
 }
